@@ -1,26 +1,28 @@
-import React from 'react';
+import React from 'react'
+import { serialize } from 'next-mdx-remote/serialize'
 
-import BlogHero from '@/components/BlogHero';
+import BlogHero from '@/components/BlogHero'
+import RenderBlog from '@/components/RenderBlog'
+import { loadBlogPost } from '@/helpers/file-helpers'
 
-import styles from './postSlug.module.css';
+import styles from './postSlug.module.css'
 
-function BlogPost() {
-  return (
-    <article className={styles.wrapper}>
-      <BlogHero
-        title="Example post!"
-        publishedOn={new Date()}
-      />
-      <div className={styles.page}>
-        <p>This is where the blog post will go!</p>
-        <p>
-          You will need to use <em>MDX</em> to render all of
-          the elements created from the blog post in this
-          spot.
-        </p>
-      </div>
-    </article>
-  );
+async function BlogPost({ params }) {
+	const { postSlug } = params
+	const blogData = await loadBlogPost(postSlug)
+	const { frontmatter, content } = blogData
+	const { publishedOn, title } = frontmatter
+
+	const mdxSource = await serialize(content)
+
+	return (
+		<article className={styles.wrapper}>
+			<BlogHero title={title} publishedOn={publishedOn} />
+			<div className={styles.page}>
+				<RenderBlog blogData={mdxSource}></RenderBlog>
+			</div>
+		</article>
+	)
 }
 
-export default BlogPost;
+export default BlogPost
